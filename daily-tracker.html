@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily Money Tracker | Harshita</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --danger: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #adb5bd;
+            --light-gray: #e9ecef;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e2e8f0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.6s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: var(--secondary);
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--danger);
+            border-radius: 2px;
+        }
+
+        .date-display {
+            text-align: center;
+            color: var(--gray);
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        .budget-setup {
+            background: rgba(67, 97, 238, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .budget-setup h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .budget-setup h2 i {
+            font-size: 1.4rem;
+        }
+
+        .budget-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .budget-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid var(--primary-light);
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .budget-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .set-budget-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .set-budget-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .set-budget-btn:active {
+            transform: translateY(0);
+        }
+
+        .quick-stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 120px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            animation: cardEntrance 0.6s ease-out;
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .stat-card p {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .spent {
+            color: var(--danger);
+        }
+
+        .remaining {
+            color: var(--success);
+        }
+
+        .budget {
+            color: var(--primary);
+        }
+
+        .progress-container {
+            height: 12px;
+            background: var(--light-gray);
+            border-radius: 6px;
+            margin: 25px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            border-radius: 6px;
+            width: 0;
+            transition: width 1s ease-out;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .add-expense {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .add-expense input, 
+        .add-expense select {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .add-expense input:focus, 
+        .add-expense select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .expense-list {
+            margin-top: 25px;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            animation: slideIn 0.4s forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .expense-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .expense-info {
+            flex: 1;
+        }
+
+        .expense-category {
+            font-size: 0.8rem;
+            color: white;
+            background: var(--primary-light);
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+
+        .expense-amount {
+            font-weight: 600;
+            color: var(--danger);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            font-size: 1.2rem;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .delete-btn:hover {
+            background: rgba(239, 35, 60, 0.1);
+            color: var(--danger);
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+            animation: fadeIn 0.6s;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--primary-light);
+            opacity: 0.7;
+        }
+
+        .category-icon {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .quick-stats {
+                flex-direction: column;
+            }
+
+            .stat-card {
+                width: 100%;
+            }
+
+            .add-expense {
+                flex-direction: column;
+            }
+
+            .add-expense input, 
+            .add-expense select {
+                width: 100%;
+            }
+
+            .budget-input-group {
+                flex-direction: column;
+            }
+
+            .budget-input, .set-budget-btn {
+                width: 100%;
+            }
+        }
+
+        /* Orientation warning */
+        .orientation-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            .orientation-warning {
+                display: flex;
+            }
+            
+            body {
+                overflow: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Daily Expense Tracker</h1>
+        <div class="date-display" id="currentDate"></div>
+        
+        <div class="budget-setup" id="budgetSetup">
+            <h2><i class="fas fa-wallet"></i> Set Today's Budget</h2>
+            <div class="budget-input-group">
+                <input type="number" class="budget-input" id="dailyBudgetInput" placeholder="Enter amount" step="0.01" min="0">
+                <button class="set-budget-btn" id="setBudgetBtn">
+                    <i class="fas fa-check"></i> Set Budget
+                </button>
+            </div>
+        </div>
+        
+        <div class="quick-stats" id="quickStats" style="display: none;">
+            <div class="stat-card">
+                <h3>Daily Budget</h3>
+                <p class="budget">$<span id="dailyBudgetDisplay">0.00</span></p>
+            </div>
+            <div class="stat-card">
+                <h3>Spent Today</h3>
+                <p class="spent">$<span id="spentToday">0.00</span></p>
+            </div>
+            <div class="stat-card">
+                <h3>Remaining</h3>
+                <p class="remaining">$<span id="remainingToday">0.00</span></p>
+            </div>
+        </div>
+        
+        <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-bar" id="budgetProgress"></div>
+        </div>
+        
+        <div class="add-expense" id="addExpenseSection" style="display: none;">
+            <input type="text" id="expenseName" placeholder="What did you spend on?">
+            <input type="number" id="expenseAmount" placeholder="Amount" step="0.01" min="0">
+            <select id="expenseCategory">
+                <option value="food"><i class="fas fa-utensils"></i> Food</option>
+                <option value="transport"><i class="fas fa-bus"></i> Transport</option>
+                <option value="shopping"><i class="fas fa-shopping-bag"></i> Shopping</option>
+                <option value="entertainment"><i class="fas fa-film"></i> Entertainment</option>
+                <option value="bills"><i class="fas fa-file-invoice-dollar"></i> Bills</option>
+                <option value="other"><i class="fas fa-ellipsis-h"></i> Other</option>
+            </select>
+            <button class="btn" id="addExpenseBtn">
+                <i class="fas fa-plus"></i> Add Expense
+            </button>
+        </div>
+        
+        <div class="expense-list" id="expenseList">
+            <div class="empty-state">
+                <i class="fas fa-coins"></i>
+                <h3>No expenses tracked yet</h3>
+                <p>Set your daily budget to begin tracking</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="orientation-warning">
+        <i class="fas fa-rotate" style="font-size: 3rem; margin-bottom: 20px;"></i>
+        <h2>Please rotate your device</h2>
+        <p>For the best experience, please use portrait mode on your mobile device.</p>
+    </div>
+
+    <script>
+        // DOM Elements
+        const currentDateEl = document.getElementById('currentDate');
+        const budgetSetupEl = document.getElementById('budgetSetup');
+        const quickStatsEl = document.getElementById('quickStats');
+        const progressContainerEl = document.getElementById('progressContainer');
+        const addExpenseSectionEl = document.getElementById('addExpenseSection');
+        const expenseListEl = document.getElementById('expenseList');
+        const dailyBudgetInputEl = document.getElementById('dailyBudgetInput');
+        const setBudgetBtnEl = document.getElementById('setBudgetBtn');
+        const dailyBudgetDisplayEl = document.getElementById('dailyBudgetDisplay');
+        const spentTodayEl = document.getElementById('spentToday');
+        const remainingTodayEl = document.getElementById('remainingToday');
+        const budgetProgressEl = document.getElementById('budgetProgress');
+        const expenseNameEl = document.getElementById('expenseName');
+        const expenseAmountEl = document.getElementById('expenseAmount');
+        const expenseCategoryEl = document.getElementById('expenseCategory');
+        const addExpenseBtnEl = document.getElementById('addExpenseBtn');
+
+        // State
+        let dailyBudget = 0;
+        let expenses = [];
+        let today = new Date().toDateString();
+
+        // Initialize
+        function init() {
+            // Set current date
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateEl.textContent = new Date().toLocaleDateString('en-US', options);
+            
+            // Load from localStorage if available
+            const savedData = localStorage.getItem('dailyTrackerData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                if (data.date === today) {
+                    dailyBudget = data.dailyBudget;
+                    expenses = data.expenses;
+                    
+                    // Hide budget setup and show tracking UI
+                    budgetSetupEl.style.display = 'none';
+                    quickStatsEl.style.display = 'flex';
+                    progressContainerEl.style.display = 'block';
+                    addExpenseSectionEl.style.display = 'flex';
+                    
+                    // Update UI
+                    updateUI();
+                }
+            }
+            
+            // Event listeners
+            setBudgetBtnEl.addEventListener('click', setDailyBudget);
+            addExpenseBtnEl.addEventListener('click', addExpense);
+            
+            // Allow Enter key to submit budget
+            dailyBudgetInputEl.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    setDailyBudget();
+                }
+            });
+            
+            // Allow Enter key to add expense
+            expenseAmountEl.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addExpense();
+                }
+            });
+        }
+
+        // Set daily budget
+        function setDailyBudget() {
+            const budgetValue = parseFloat(dailyBudgetInputEl.value);
+            
+            if (isNaN(budgetValue) || budgetValue <= 0) {
+                alert('Please enter a valid budget amount');
+                return;
+            }
+            
+            dailyBudget = budgetValue;
+            
+            // Hide budget setup and show tracking UI
+            budgetSetupEl.style.display = 'none';
+            quickStatsEl.style.display = 'flex';
+            progressContainerEl.style.display = 'block';
+            addExpenseSectionEl.style.display = 'flex';
+            
+            // Update UI
+            updateUI();
+            
+            // Save to localStorage
+            saveData();
+        }
+
+        // Add new expense
+        function addExpense() {
+            const name = expenseNameEl.value.trim();
+            const amount = parseFloat(expenseAmountEl.value);
+            const category = expenseCategoryEl.value;
+            
+            if (!name || isNaN(amount) || amount <= 0) {
+                alert('Please enter valid expense details');
+                return;
+            }
+            
+            expenses.push({ name, amount, category, date: new Date() });
+            
+            // Clear inputs
+            expenseNameEl.value = '';
+            expenseAmountEl.value = '';
+            expenseNameEl.focus();
+            
+            // Update UI and save
+            updateUI();
+            saveData();
+        }
+
+        // Remove expense
+        function removeExpense(index) {
+            expenses.splice(index, 1);
+            updateUI();
+            saveData();
+        }
+
+        // Update all UI elements
+        function updateUI() {
+            // Calculate totals
+            const spent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+            const remaining = dailyBudget - spent;
+            const progressPercent = Math.min((spent / dailyBudget) * 100, 100);
+            
+            // Update displays
+            dailyBudgetDisplayEl.textContent = dailyBudget.toFixed(2);
+            spentTodayEl.textContent = spent.toFixed(2);
+            remainingTodayEl.textContent = remaining.toFixed(2);
+            budgetProgressEl.style.width = `${progressPercent}%`;
+            
+            // Change progress bar color if over budget
+            if (spent > dailyBudget) {
+                budgetProgressEl.style.background = 'linear-gradient(90deg, var(--danger), var(--warning))';
+            } else {
+                budgetProgressEl.style.background = 'linear-gradient(90deg, var(--primary-light), var(--primary))';
+            }
+            
+            // Render expense list
+            renderExpenseList();
+        }
+
+        // Render expense list
+        function renderExpenseList() {
+            if (expenses.length === 0) {
+                expenseListEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-coins"></i>
+                        <h3>No expenses today</h3>
+                        <p>Add your first expense to begin tracking</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by most recent first
+            const sortedExpenses = [...expenses].sort((a, b) => b.date - a.date);
+            
+            expenseListEl.innerHTML = sortedExpenses.map((expense, index) => `
+                <div class="expense-item">
+                    <div class="expense-info">
+                        <span class="expense-category">
+                            <i class="fas ${getCategoryIcon(expense.category)}"></i>
+                            ${expense.category.charAt(0).toUpperCase() + expense.category.slice(1)}
+                        </span>
+                        <div>${expense.name}</div>
+                    </div>
+                    <div class="expense-amount">$${expense.amount.toFixed(2)}</div>
+                    <button class="delete-btn" onclick="removeExpense(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Get icon for category
+        function getCategoryIcon(category) {
+            const icons = {
+                food: 'fa-utensils',
+                transport: 'fa-bus',
+                shopping: 'fa-shopping-bag',
+                entertainment: 'fa-film',
+                bills: 'fa-file-invoice-dollar',
+                other: 'fa-ellipsis-h'
+            };
+            return icons[category] || 'fa-tag';
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            const data = {
+                date: today,
+                dailyBudget,
+                expenses
+            };
+            localStorage.setItem('dailyTrackerData', JSON.stringify(data));
+        }
+
+        // Initialize the app
+        init();
+
+        // Make removeExpense available globally for onclick
+        window.removeExpense = removeExpense;
+    </script>
+</body>
+</html>

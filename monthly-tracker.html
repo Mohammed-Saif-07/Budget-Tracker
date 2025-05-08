@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Budget Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary: #4cc9f0;
+            --success: #38b000;
+            --danger: #ef233c;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+            color: var(--primary-dark);
+            font-weight: 600;
+            font-size: 2.2rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 8px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            margin: 0;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .tab-button:hover::before {
+            left: 100%;
+        }
+
+        .tab-button.active {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .month-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .add-btn, .export-btn {
+            padding: 10px 20px;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .add-btn {
+            background-color: var(--success);
+        }
+
+        .add-btn:hover {
+            background-color: #2b8a00;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .export-btn {
+            background-color: var(--danger);
+        }
+
+        .export-btn:hover {
+            background-color: #d90429;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            text-align: left;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        .remove-btn {
+            padding: 6px 12px;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: var(--danger);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .remove-btn:hover {
+            background-color: #d90429;
+        }
+
+        tfoot td {
+            font-weight: 600;
+            background: var(--light-gray);
+        }
+
+        tfoot tr:first-child td {
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+        }
+
+        /* Section headers */
+        tr[data-section] td {
+            font-weight: 500;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .tabs {
+                gap: 5px;
+            }
+
+            .tab-button {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .add-btn, .export-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tr {
+                margin-bottom: 15px;
+                background: white;
+                padding: 10px;
+                border-radius: 8px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+
+            td {
+                padding: 8px 10px 8px 40%;
+                text-align: right;
+                position: relative;
+                border: none;
+                border-bottom: 1px solid #eee;
+            }
+
+            td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                top: 8px;
+                font-weight: 500;
+                text-align: left;
+                color: var(--dark);
+            }
+
+            input[type="number"], input[type="text"] {
+                font-size: 1rem;
+                padding: 6px 8px;
+            }
+
+            .remove-btn {
+                width: 100%;
+                padding: 8px;
+            }
+
+            tfoot td {
+                display: block;
+                text-align: right;
+                padding-left: 40%;
+            }
+
+            tfoot td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                top: 8px;
+                font-weight: 500;
+                text-align: left;
+                color: var(--dark);
+            }
+
+            tfoot tr:first-child td {
+                padding-left: 10px;
+                text-align: center;
+            }
+
+            tfoot tr:first-child td::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+  <h1>Monthly Budget Tracker</h1>
+  <div class="tabs" id="monthTabs"></div>
+
+  <div id="monthsContainer"></div>
+
+  <script>
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+  
+    const defaultRows = [
+      { label: "INCOME", isHeader: true },
+      { label: "GIC Monthly Stipend", section: "income" },
+      { label: "Part-time Job Income (Post-tax)", section: "income" },
+  
+      { label: "EXPENSES", isHeader: true },
+      { label: "Rent", section: "expenses" },
+      { label: "Groceries", section: "expenses" },
+      { label: "Phone & Wi-Fi", section: "expenses" },
+      { label: "Transport", section: "expenses" },
+      { label: "Essentials (Toiletries, Laundry, etc.)", section: "expenses" },
+      { label: "Miscellaneous (eating out, etc.)", section: "expenses" },
+  
+      { label: "SAVINGS", isHeader: true },
+      { label: "Emergency Fund Savings", section: "savings" },
+      { label: "TFSA Investment", section: "savings" }
+    ];
+  
+    const monthTabs = document.getElementById("monthTabs");
+    const monthsContainer = document.getElementById("monthsContainer");
+  
+    months.forEach(month => {
+      // Tabs
+      const tabBtn = document.createElement("button");
+      tabBtn.textContent = month;
+      tabBtn.className = "tab-button";
+      tabBtn.dataset.month = month;
+      tabBtn.onclick = () => showMonth(month);
+      monthTabs.appendChild(tabBtn);
+  
+      // Content
+      const section = document.createElement("div");
+      section.className = "month-content";
+      section.id = month;
+      section.innerHTML = ` 
+        <div class="action-buttons">
+            <button class="add-btn" onclick="addRow('${month}')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"></path>
+                </svg>
+                Add Row
+            </button>
+            <button class="export-btn" onclick="exportToPDF('${month}')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export to PDF
+            </button>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Estimated</th>
+              <th>Actual</th>
+              <th>Difference</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${defaultRows.map(row => row.isHeader
+              ? `<tr><td colspan="5" style="background: #f1f3f5; font-weight: 600;">${row.label}</td></tr>`
+              : `<tr data-section="${row.section || ''}">
+                  <td data-label="Category">${row.label}</td>
+                  <td data-label="Estimated"><input type="number" class="estimated" oninput="calculateAll('${month}')"></td>
+                  <td data-label="Actual"><input type="number" class="actual" oninput="calculateAll('${month}')"></td>
+                  <td data-label="Difference" class="difference">0.00</td>
+                  <td data-label="Action"><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+                </tr>`).join("")}
+          </tbody>
+          <tfoot>
+            <tr><td colspan="5">Summary</td></tr>
+            <tr>
+              <td data-label="Total Income"><strong>Total Income</strong></td>
+              <td colspan="3" data-label="Amount" id="${month}-income-total">0.00</td><td></td>
+            </tr>
+            <tr>
+              <td data-label="Total Expenses"><strong>Total Expenses</strong></td>
+              <td colspan="3" data-label="Amount" id="${month}-expenses-total">0.00</td><td></td>
+            </tr>
+            <tr>
+              <td data-label="Total Savings"><strong>Total Savings</strong></td>
+              <td colspan="3" data-label="Amount" id="${month}-savings-total">0.00</td><td></td>
+            </tr>
+            <tr>
+              <td data-label="Remaining Balance"><strong>Remaining Balance</strong></td>
+              <td colspan="3" data-label="Amount" id="${month}-balance">0.00</td><td></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      monthsContainer.appendChild(section);
+    });
+  
+    function showMonth(month) {
+      document.querySelectorAll(".month-content").forEach(el => el.style.display = "none");
+      document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+      document.getElementById(month).style.display = "block";
+      document.querySelector(`.tab-button[data-month="${month}"]`).classList.add("active");
+    }
+  
+    function calculateAll(monthId) {
+      const sectionEl = document.getElementById(monthId);
+      const rows = sectionEl.querySelectorAll("tbody tr[data-section]");
+      let totals = {
+        income: 0,
+        expenses: 0,
+        savings: 0
+      };
+  
+      rows.forEach(row => {
+        const section = row.dataset.section;
+        const estInput = row.querySelector(".estimated");
+        const actInput = row.querySelector(".actual");
+        const diffCell = row.querySelector(".difference");
+  
+        if (estInput && actInput && diffCell) {
+          const est = parseFloat(estInput.value) || 0;
+          const act = parseFloat(actInput.value) || 0;
+          const diff = act - est;
+          diffCell.textContent = diff.toFixed(2);
+          if (totals[section] !== undefined) {
+            totals[section] += act;
+          }
+        }
+      });
+  
+      sectionEl.querySelector(`#${monthId}-income-total`).textContent = totals.income.toFixed(2);
+      sectionEl.querySelector(`#${monthId}-expenses-total`).textContent = totals.expenses.toFixed(2);
+      sectionEl.querySelector(`#${monthId}-savings-total`).textContent = totals.savings.toFixed(2);
+      const remaining = totals.income - totals.expenses - totals.savings;
+      sectionEl.querySelector(`#${monthId}-balance`).textContent = remaining.toFixed(2);
+    }
+  
+    function addRow(monthId) {
+      const tbody = document.querySelector(`#${monthId} tbody`);
+      const newRow = document.createElement("tr");
+      newRow.setAttribute("data-section", "income");
+      newRow.innerHTML = `
+        <td data-label="Category"><input type="text" placeholder="New Category"></td>
+        <td data-label="Estimated"><input type="number" class="estimated" oninput="calculateAll('${monthId}')"></td>
+        <td data-label="Actual"><input type="number" class="actual" oninput="calculateAll('${monthId}')"></td>
+        <td data-label="Difference" class="difference">0.00</td>
+        <td data-label="Action"><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+      `;
+      tbody.appendChild(newRow);
+      // Scroll to the new row
+      newRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  
+    function removeRow(btn) {
+      const row = btn.closest("tr");
+      row.style.transform = "translateX(-100%)";
+      row.style.opacity = "0";
+      setTimeout(() => {
+        row.remove();
+        calculateAll(row.closest(".month-content").id);
+      }, 300);
+    }
+  
+    function exportToPDF(monthId) {
+      const section = document.getElementById(monthId);
+      const exportBtn = document.querySelector(`#${monthId} .export-btn`);
+      
+      // Change button text temporarily
+      const originalText = exportBtn.innerHTML;
+      exportBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+        </svg>
+        Generating...
+      `;
+      
+      const options = {
+        margin: 1,
+        filename: `${monthId}_budget.pdf`,
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true
+        }
+      };
+      
+      html2pdf()
+        .from(section)
+        .set(options)
+        .save()
+        .then(() => {
+          exportBtn.innerHTML = originalText;
+        });
+    }
+  
+    // Default month to show
+    showMonth(months[new Date().getMonth()]);
+  </script>
+</body>
+</html>
